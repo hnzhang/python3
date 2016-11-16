@@ -56,6 +56,39 @@ class Graph:
         for item in self._nodes.items():
             print("Node Value: ", end = " ")
             item[1].print()
+    def load(graphInStr):
+        '''
+            To load graph from string.
+            example of definition:
+            Nodes
+            5
+            a
+            b
+            c
+            d
+            e
+            Edges
+            7
+            a
+            b
+            a
+            c
+            a
+            d
+            a
+            e
+            b
+            c
+            b
+            d
+            b
+            e
+        '''
+        if graphInStr :
+            f = io.StringIO(graphInStr)
+            g = Graph()
+            f.readline()
+
 
 def testCase():
     print("========Start test====")
