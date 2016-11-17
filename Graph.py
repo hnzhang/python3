@@ -1,4 +1,5 @@
 #python 3.x code
+import io
 
 class GraphNode:
     '''
@@ -42,7 +43,7 @@ class Graph:
 
     def getNode(self, nodeName):
         node = None
-        if(not isinstance(nodeName, str)):
+        if(isinstance(nodeName, str)):
             if( nodeName in self._nodes ):
                 node = self._nodes[nodeName]
         return node
@@ -60,7 +61,7 @@ class Graph:
         to.addNeighbor(frm)
         frm.addNeighbor(to)
 
-    def printGraph(self):
+    def print(self):
         '''
         To print out graph node by node, for each node, print out adjacency list
         '''
@@ -97,15 +98,14 @@ class Graph:
             b
             d
             b
-            e
         '''
         g = None
         if graphInStr :
             g = Graph()
             with io.StringIO(graphInStr) as f:
                 tag = ''; frmNodeStr = ''; toNodeStr = ''
-                while( not f.eof()):
-                    line = f.readline()
+                for line in f:
+                    line = line.strip()
                     if(line == 'Nodes'):
                         tag = 'node'
                     elif( line == "Edges"):
@@ -114,14 +114,17 @@ class Graph:
                         node = GraphNode(line)
                         g.addNode(node)
                     elif(tag == 'edge'):
+                        print('getting node names for edges')
                         if(not frmNodeStr):
                             frmNodeStr = line
                         elif(not toNodeStr):
                             toNodeStr = line
                         elif(frmNodeStr and toNodeStr):
+                            print('trying to add edge [{}]-[{}]'.format(frmNodeStr, toNodeStr))
                             nodeFrom = g.getNode(frmNodeStr)
                             nodeTo = g.getNode(toNodeStr)
                             if( nodeFrom and nodeTo):
+                                print('adding edge:[{}]-[{}]'.format(frmNodeStr, toNodeStr))
                                 g.addEdge(nodeFrom, nodeTo)
                             frmNodeStr = ''; toNodeStr = ''
 
@@ -129,16 +132,51 @@ class Graph:
 
 
 
-def testCase():
-    print("========Start test====")
+def testCaseCreateSimpleGraph():
+    print("========Start test[Create Simple Graph]====")
     g = Graph()
     neast = GraphNode("East")
     g.addNode(neast)
     westNode = GraphNode("west")
     g.addNode(westNode)
     g.addEdge(neast, westNode)
-    g.printGraph()
+    g.print()
+    print("========End test[Create Simple Graph]====")
+def testCaseLoadGraph():
+    print('======== Start test[Load Graph from string]==')
+    graphStr = '''
+    Nodes
+            5
+            a
+            b
+            c
+            d
+            e
+            Edges
+            a
+            b
+            a
+            c
+            a
+            d
+            a
+            e
+            b
+            c
+            b
+            d
+            b
+            e
+    '''
+    g = Graph.load(graphStr)
+    if( g ):
+        g.print()
+    else:
+        print("cannot load graph", file= sys.stderr)
+        print("Graph str for references: {0}".format(graphStr))
+    print('======== End test[Load Graph from string]==')
 
 if __name__ == "__main__" :
-    testCase()
+    testCaseCreateSimpleGraph()
+    testCaseLoadGraph()
 
