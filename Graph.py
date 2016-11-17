@@ -14,6 +14,9 @@ class GraphNode:
         print("Node value: {0}]".format(self._name), end = " ")
         self.printNeighbors()
 
+    def getName(self):
+        return self._name
+
     def printNeighbors(self):
         print("[Neightors] ", end = "")
         for n in self._neighbors:
@@ -31,11 +34,19 @@ class Graph:
     def __init__(self):
         self._nodes = {}
     def addNode(self, node):
-        nodeid = id(node)
-        if(nodeid not in self._nodes):
-            self._nodes[nodeid] = node
+        nodeName = node.getName()
+        if(nodeName not in self._nodes):
+            self._nodes[nodeName] = node
         else:
-            print("Node with ID has in graph")
+            print("Node with name [{0}] has in graph".format(nodeName))
+
+    def getNode(self, nodeName):
+        node = None
+        if(not isinstance(nodeName, str)):
+            if( nodeName in self._nodes ):
+                node = self._nodes[nodeName]
+        return node
+
     def addEdge(self, frm, to ):
         '''
             To add an edge to the graph
@@ -56,6 +67,10 @@ class Graph:
         for item in self._nodes.items():
             print("Node Value: ", end = " ")
             item[1].print()
+    def loadNotes(self, fileHandle):
+        if(not fileHandle):
+            return
+
     def load(graphInStr):
         '''
             To load graph from string.
@@ -84,10 +99,34 @@ class Graph:
             b
             e
         '''
+        g = None
         if graphInStr :
-            f = io.StringIO(graphInStr)
             g = Graph()
-            f.readline()
+            with io.StringIO(graphInStr) as f:
+                tag = ''; frmNodeStr = ''; toNodeStr = ''
+                while( not f.eof()):
+                    line = f.readline()
+                    if(line == 'Nodes'):
+                        tag = 'node'
+                    elif( line == "Edges"):
+                        tag = 'edge'
+                    elif(tag == 'node'):
+                        node = GraphNode(line)
+                        g.addNode(node)
+                    elif(tag == 'edge'):
+                        if(not frmNodeStr):
+                            frmNodeStr = line
+                        elif(not toNodeStr):
+                            toNodeStr = line
+                        elif(frmNodeStr and toNodeStr):
+                            nodeFrom = g.getNode(frmNodeStr)
+                            nodeTo = g.getNode(toNodeStr)
+                            if( nodeFrom and nodeTo):
+                                g.addEdge(nodeFrom, nodeTo)
+                            frmNodeStr = ''; toNodeStr = ''
+
+        return g
+
 
 
 def testCase():
