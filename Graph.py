@@ -10,6 +10,7 @@ class GraphNode:
         self._value = 0
         self._weight = 1
         self._name = _name
+        self._visited  = False
 
     def print(self):
         print("Node value: {0}]".format(self._name), end = " ")
@@ -27,6 +28,13 @@ class GraphNode:
     def addNeighbor(self, to):
         self._neighbors.append(to)
 
+    def setVisited(self, val):
+        if(isinstance(val, bool)):
+            self._visited = val
+    def getVisited(self):
+        return self._visited
+    def getNeighbors(self):
+        return self._neighbors
 
 class Graph:
     '''
@@ -68,36 +76,35 @@ class Graph:
         for item in self._nodes.items():
             print("Node Value: ", end = " ")
             item[1].print()
-    def loadNotes(self, fileHandle):
-        if(not fileHandle):
+    def resetVisitedFlags(self):
+        for value in self._nodes.values():
+            value.setVisited(False)
+
+    def dfs( node, printTrace = False):
+        #self.ressetVisitedFlags(False)
+        if( not isinstance(node, GraphNode)):
             return
+        if(node.getVisited() == True):
+            return
+
+        if(printTrace):
+            print( "node[{}]".format(node.getName()), end = " ")
+        node.setVisited(True)
+        for n in node.getNeighbors():
+            Graph.dfs(n, printTrace) 
+
+
+    def bfs(self, node):
+        pass
 
     def load(graphInStr):
         '''
             To load graph from string.
             example of definition:
             Nodes
-            5
-            a
-            b
-            c
-            d
-            e
+            5,a,b,c,d,e
             Edges
-            7
-            a
-            b
-            a
-            c
-            a
-            d
-            a
-            e
-            b
-            c
-            b
-            d
-            b
+            5,a b,a c,a d,a e,b c,b d,b
         '''
         g = None
         if graphInStr :
@@ -111,26 +118,27 @@ class Graph:
                     elif( line == "Edges"):
                         tag = 'edge'
                     elif(tag == 'node'):
-                        node = GraphNode(line)
-                        g.addNode(node)
+                        for nodeName in line.split(','):
+                            nodeName = nodeName.strip()
+                            if(nodeName):
+                                node = GraphNode(nodeName)
+                                g.addNode(node)
                     elif(tag == 'edge'):
-                        print('getting node names for edges')
-                        if(not frmNodeStr):
-                            frmNodeStr = line
-                        elif(not toNodeStr):
-                            toNodeStr = line
-                        elif(frmNodeStr and toNodeStr):
-                            print('trying to add edge [{}]-[{}]'.format(frmNodeStr, toNodeStr))
-                            nodeFrom = g.getNode(frmNodeStr)
-                            nodeTo = g.getNode(toNodeStr)
-                            if( nodeFrom and nodeTo):
-                                print('adding edge:[{}]-[{}]'.format(frmNodeStr, toNodeStr))
-                                g.addEdge(nodeFrom, nodeTo)
-                            frmNodeStr = ''; toNodeStr = ''
+                        for edgeStr in line.split(' '):
+                            edgeStr = edgeStr.strip()
+                            nodes = edgeStr.split(',')
+                            if(len(nodes) > 1):
+                                frmNodeStr = nodes[0].strip()
+                                toNodeStr = nodes[1].strip()
+                                if(frmNodeStr and toNodeStr):
+                                    print('trying to add edge [{}]-[{}]'.format(frmNodeStr, toNodeStr))
+                                    nodeFrom = g.getNode(frmNodeStr)
+                                    nodeTo = g.getNode(toNodeStr)
+                                    if( nodeFrom and nodeTo):
+                                        print('adding edge:[{}]-[{}]'.format(frmNodeStr, toNodeStr))
+                                        g.addEdge(nodeFrom, nodeTo)
 
         return g
-
-
 
 def testCaseCreateSimpleGraph():
     print("========Start test[Create Simple Graph]====")
@@ -146,27 +154,9 @@ def testCaseLoadGraph():
     print('======== Start test[Load Graph from string]==')
     graphStr = '''
     Nodes
-            5
-            a
-            b
-            c
-            d
-            e
-            Edges
-            a
-            b
-            a
-            c
-            a
-            d
-            a
-            e
-            b
-            c
-            b
-            d
-            b
-            e
+    5,a,b,c,d,e
+    Edges
+    a,b a,c a,d a,e b,c b,d b,e
     '''
     g = Graph.load(graphStr)
     if( g ):
@@ -175,8 +165,24 @@ def testCaseLoadGraph():
         print("cannot load graph", file= sys.stderr)
         print("Graph str for references: {0}".format(graphStr))
     print('======== End test[Load Graph from string]==')
+def testCaseDFS():
+    print("Graph test: DFS")
+    graphStr = '''
+    Nodes
+    0,1,2,3,4,5
+    Edges
+    0,1 0,2 0,3 1,3 2,3 2,4 3,4 4,5
+    '''
+    g = Graph.load(graphStr)
+    #g.print()
+    if ( g):
+        g.resetVisitedFlags()
+        node = g.getNode('0')
+        Graph.dfs( node, True)
+    print("\nEnd of DFS test")
 
 if __name__ == "__main__" :
     testCaseCreateSimpleGraph()
     testCaseLoadGraph()
+    testCaseDFS()
 
