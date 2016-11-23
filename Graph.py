@@ -1,5 +1,6 @@
 #python 3.x code
 import io
+from collections import deque
 
 class GraphNode:
     '''
@@ -93,9 +94,34 @@ class Graph:
         for n in node.getNeighbors():
             Graph.dfs(n, printTrace) 
 
+    def dfsWithStack(node, printTrace = False):
+        if( not isinstance(node, GraphNode)):
+            return
 
-    def bfs(self, node):
-        pass
+        stack = [node]
+        while(len(stack) >0):
+            n = stack.pop()
+            if(n.getVisited()):
+                continue
+            n.setVisited(True)
+            if(printTrace):
+                print( "node[{}]".format(n.getName()), end = " ")
+            for nn in n.getNeighbors():
+                if(not nn.getVisited()):
+                    stack.append(nn)
+
+    def bfs(node, printTrace = False):
+        queue = deque([node])
+        while(len(queue) >0):
+            n = queue.popleft()
+            if(n.getVisited()):
+                continue
+            n.setVisited(True)
+            if(printTrace):
+                print("node[{}]".format(n.getName()), end = ' ')
+            for nn in n.getNeighbors():
+                if(not nn.getVisited()):
+                    queue.append(nn)
 
     def load(graphInStr):
         '''
@@ -181,8 +207,43 @@ def testCaseDFS():
         Graph.dfs( node, True)
     print("\nEnd of DFS test")
 
+def testCaseDFSWithStack():
+    print("Graph test: DFSWithStack")
+    graphStr = '''
+    Nodes
+    0,1,2,3,4,5
+    Edges
+    0,1 0,2 0,3 1,3 2,3 2,4 3,4 4,5
+    '''
+    g = Graph.load(graphStr)
+    #g.print()
+    if ( g):
+        g.resetVisitedFlags()
+        node = g.getNode('0')
+        Graph.dfsWithStack( node, True)
+    print("\nEnd of DFSwithStack test")
+
+def testCaseBFS():
+    print("Graph test: bfs")
+    graphStr = '''
+    Nodes
+    0,1,2,3,4,5
+    Edges
+    0,1 0,2 0,3 1,3 2,3 2,4 3,4 4,5
+    '''
+    g = Graph.load(graphStr)
+    #g.print()
+    if ( g):
+        g.resetVisitedFlags()
+        node = g.getNode('0')
+        Graph.bfs( node, True)
+    print("\nEnd of bfs test")
+
+
 if __name__ == "__main__" :
     testCaseCreateSimpleGraph()
     testCaseLoadGraph()
     testCaseDFS()
+    testCaseDFSWithStack()
+    testCaseBFS()
 
