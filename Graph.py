@@ -17,7 +17,7 @@ class GraphNode:
         self._name = _name
         self._id = -1
         self._visited  = False
-        self._color = Color.White
+        self._color = GraphNode.Color.White
 
     def print(self):
         print("Node: {0}]".format(self._name), end = " ")
@@ -50,20 +50,21 @@ class GraphNode:
         return self._outWeights[index]
 
     def resetColor(self):
-        self._color = Color.White
+        self._color = GraphNode.Color.White
     def setColorFinish(self):
-        self._color = Color.Black
+        self._color = GraphNode.Color.Black
     def setColorIntermediate(self):
-        self._color = Color.Grey
+        self._color = GraphNode.Color.Grey
     
-    def dfs(self, printTrace = False), topologicalSortResult = None):
-        if(self._color == Color.White):
-            self._color = Color.Grey
+    def dfs(self, printTrace = False, topologicalSortResult = None):
+        if(self._color == GraphNode.Color.White):
+            self._color = GraphNode.Color.Grey
+            if(printTrace): print("[Node d] {}".format(self._name), end = " " )
             for n in self.getNeighbors():
-                n.dfs( printTrace)
-            self._color = Color.Black
-            if(printTrace): print("[Node] {}".format(self.__name__), end = " " )
-            if(isinstance(topologicalSortResult, list): topologicalSortResult.append(self)
+                n.dfs( printTrace, topologicalSortResult)
+            self._color = GraphNode.Color.Black
+            if(printTrace): print("[Node f] {}".format(self._name), end = " " )
+            if(isinstance(topologicalSortResult, list)): topologicalSortResult.append(self)
 
 class Graph:
     '''
@@ -126,12 +127,13 @@ class Graph:
         for n in self._nodes.values():
             if(n._color == GraphNode.Color.White):
                 n.dfs(printTrace, topologicalSortResult)
+
     def topologicalSort(self):
         '''
         Do topoligical sort on the whole graph by using dfs
         '''
         sortedResult = []
-        
+        self.dfs(True, sortedResult)
     
     def dfsWithStack(node, printTrace = False):
         if( not isinstance(node, GraphNode)):
@@ -143,11 +145,11 @@ class Graph:
             if(n.getVisited()):
                 continue
             n.setVisited(True)
-            if(printTrace):
-                print( "node[{}]".format(n.getName()), end = " ")
+            if(printTrace): print( "node d[{}]".format(n.getName()), end = " ")
             for nn in n.getNeighbors():
                 if(not nn.getVisited()):
                     stack.append(nn)
+            if(printTrace): print( "node f[{}]".format(n.getName()), end = " ")
 
     def bfs(node, printTrace = False):
         queue = deque([node])
@@ -312,7 +314,7 @@ def testCaseDFS():
         g.resetVisitedFlags()
         node = g.getNode('0')
         print("\nStart of DFS test")
-        Graph.dfs( node, True)
+        g.dfs(True)
     print("\n===================End of DFS test========================")
 
 def testCaseDFSWithStack():
@@ -371,13 +373,15 @@ def testDijkstra():
         frm = g.getNode('A')
         to  = g.getNode('H')
         if frm and to :
+            print("Shortest Path from [{0}] to [{1}]".format(frm._name, to._name))
             Graph.dijkstra(g, frm, to)
-    print("============End of Dijkstra test=======================")
+    
+    print("\n============End of Dijkstra test=======================")
 
 if __name__ == "__main__" :
     #testCaseCreateSimpleGraph()
     #testCaseLoadGraph()
-    #testCaseDFS()
-    #testCaseDFSWithStack()
+    testCaseDFS()
+    testCaseDFSWithStack()
     #testCaseBFS()
     testDijkstra()
